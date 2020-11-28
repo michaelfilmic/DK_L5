@@ -41,7 +41,7 @@ typedef struct _simulation_run_data_
 {
   Fifoqueue_Ptr buffer;
   Server_Ptr link;
-  double packet_arrival_rate;
+  int packet_arrival_rate;
   int packet_length_list[5];
   int n_byte_count;
   int current_byte_count;
