@@ -55,7 +55,7 @@ schedule_packet_arrival_event(Simulation_Run_Ptr simulation_run,
 
 long int
 schedule_slot_event(Simulation_Run_Ptr simulation_run,
-			      Time event_time)
+			      double event_time)
 {
   Event event;
 
@@ -123,11 +123,13 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
   data = (Simulation_Run_Data_Ptr) simulation_run_data(simulation_run);
 
   data->current_slot_end_time = data->current_slot_end_time + data->clk_tic;
+  printf("current time %f\n", data->current_slot_end_time);
 
   //update n
   data->current_byte_count = data->n_byte_count;
 
   next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
+
   if (fifoqueue_size(data->buffer) > 0 && next_packet->packet_size <= data->current_byte_count){
     next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
     data->current_byte_count -= next_packet->packet_size;
