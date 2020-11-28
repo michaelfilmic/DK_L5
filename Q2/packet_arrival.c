@@ -128,7 +128,8 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
   //update n
   data->current_byte_count = data->n_byte_count;
 
-  if (fifoqueue_see_front(data->buffer)){
+  next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
+  if (next_packet->packet_size <= data->current_byte_count){
     next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
     start_transmission_on_link(simulation_run, next_packet, data->link);
   }
