@@ -93,23 +93,28 @@ void packet_arrival_event(Simulation_Run_Ptr simulation_run, void *ptr)
   new_packet->status = WAITING;
   new_packet->packet_size = packet_length;
 
-  if (new_packet->packet_size > data->n_byte_count){
-    data->block_count++;
-  }
-  /* 
+  if (new_packet->packet_size <= data->n_byte_count)
+  {
+
+    /* 
    * Start transmission if the data link is free. Otherwise put the packet into
    * the buffer.
    */
-  if (server_state(data->link) == BUSY)
-  {
-    fifoqueue_put(data->buffer, (void *)new_packet);
+    if (server_state(data->link) == BUSY)
+    {
+      fifoqueue_put(data->buffer, (void *)new_packet);
+    }
+    else if (new_packet->packet_size <= data->current_byte_count)
+    {
+      data->current_byte_count -= new_packet->packet_size;
+      start_transmission_on_link(simulation_run, new_packet, data->link);
+    }
   }
-  else if (new_packet->packet_size <= data->current_byte_count)
+  else
   {
-    data->current_byte_count -= new_packet->packet_size;
-    start_transmission_on_link(simulation_run, new_packet, data->link);
+    data->block_count++;
+    xfree((void *)new_packet);
   }
-
   /* 
    * Schedule the next packet arrival. Independent, exponentially distributed
    * interarrival times gives us Poisson process arrivals.
