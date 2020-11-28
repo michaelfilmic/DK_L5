@@ -51,11 +51,14 @@ typedef struct _simulation_run_data_
 
   int B_t;
   int B_d;
-  int fixed_paket_len;
+  int fixed_packet_len;
+  int num_blocked;
+  long int number_of_packets_processed;
+  double block_rate;
+  double output_rate;
 
   long int blip_counter;
   long int arrival_count;
-  long int number_of_packets_processed;
   double accumulated_delay;
   unsigned random_seed;
 } Simulation_Run_Data, * Simulation_Run_Data_Ptr;

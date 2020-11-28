@@ -50,6 +50,7 @@ int main(void)
   Simulation_Run_Data data;
 
   Simulation_Run_Data for_avg_acc;
+  Time sim_time;
 
   /*
    * Declare and initialize our random number generator seeds defined in
@@ -58,7 +59,7 @@ int main(void)
 
   unsigned RANDOM_SEEDS[] = {RANDOM_SEED_LIST, 0};
   double PACKET_ARRIVAL_RATE_LIST[] = {PACKET_ARRIVAL_RATE};
-  int PACKET_LENGTH_LIST[] = {PACKET_LENGTH};
+  //int PACKET_LENGTH_LIST[] = {PACKET_LENGTH};
   int N_BYTE_COUNT_LIST[] = {N_BYTE_COUNT};
 
   int B_t_LIST[] = {B_T_SIZE};
@@ -75,7 +76,7 @@ int main(void)
 #ifndef NO_CSV_OUTPUT
   // create a csv file
   FILE *fp;
-  char data_set_name[] = "./Q2.csv";
+  char data_set_name[] = "./Q3.csv";
   //file IO
 
   fp = fopen(data_set_name, "w");
@@ -88,15 +89,19 @@ int main(void)
   fprintf(fp, ("Service Fraction ,"));
   fprintf(fp, ("Arrival rate,"));
   fprintf(fp, ("Mean Delay (msec),"));
+  fprintf(fp, ("B_t,"));
+  fprintf(fp, ("B_d,"));
+  fprintf(fp, ("block_rate,"));
+  fprintf(fp, ("output_rate,"));
 
   fprintf(fp, "\n");
   fclose(fp);
 #endif
 
-  for (int k = 0; k < (sizeof(CLK_TIC_LIST) / sizeof(double)); k++)
+  for (int k = 0; k < (sizeof(B_t_LIST) / sizeof(int)); k++)
   {
 
-    for (int i = 0; i < (sizeof(N_BYTE_COUNT_LIST) / sizeof(int)); i++)
+    for (int i = 0; i < (sizeof(PACKET_ARRIVAL_RATE_LIST) / sizeof(double)); i++)
     {
 
       j = 0;
@@ -106,8 +111,11 @@ int main(void)
       for_avg_acc.blip_counter = 0;
       for_avg_acc.arrival_count = 0;
       for_avg_acc.number_of_packets_processed = 0;
+      for_avg_acc.num_blocked = 0;
       for_avg_acc.accumulated_delay = 0;
       for_avg_acc.random_seed = 0;
+      for_avg_acc.block_rate = 0;
+      for_avg_acc.output_rate = 0;
 
       while (random_seed != 0)
       {
@@ -125,21 +133,27 @@ int main(void)
          */
 
         data.packet_arrival_rate = PACKET_ARRIVAL_RATE_LIST[i];
+
+        /*
         for (int m = 0; m < (sizeof(PACKET_LENGTH_LIST) / sizeof(int)); m++)
         {
           data.packet_length_list[m] = PACKET_LENGTH_LIST[m];
         }
+
         data.n_byte_count = N_BYTE_COUNT_LIST[i];
+        
         data.current_byte_count = data.n_byte_count;
+        */
 
         data.clk_tic = CLK_TIC_LIST[k];
         data.B_t = B_t_LIST[k];
         data.B_d = B_d_LIST[k];
-        data.fixed_paket_len = 1E3;
+        data.fixed_packet_len = FIXED_PACKET_LENGTH;
 
         data.blip_counter = 0;
         data.arrival_count = 0;
         data.number_of_packets_processed = 0;
+        data.num_blocked = 0;
         data.accumulated_delay = 0.0;
         data.random_seed = random_seed;
 
@@ -174,6 +188,7 @@ int main(void)
           simulation_run_execute_event(simulation_run);
         }
 
+        sim_time = simulation_run_get_time(simulation_run);
         /*
          * Output results and clean up after ourselves.
          */
@@ -186,6 +201,8 @@ int main(void)
         for_avg_acc.number_of_packets_processed += data.number_of_packets_processed;
         for_avg_acc.accumulated_delay += data.accumulated_delay;
         for_avg_acc.random_seed += data.random_seed;
+        for_avg_acc.block_rate += (double)(data.num_blocked)/(double)(data.arrival_count);
+        for_avg_acc.output_rate += (double)(data.number_of_packets_processed) / sim_time * ((double)(data.fixed_packet_len) / LINK_BIT_RATE);
 
         cleanup_memory(simulation_run);
 
@@ -199,6 +216,8 @@ int main(void)
       for_avg_acc.number_of_packets_processed /= size_rand_seed;
       for_avg_acc.accumulated_delay /= size_rand_seed;
       for_avg_acc.random_seed /= size_rand_seed;
+      for_avg_acc.block_rate /= size_rand_seed;
+      for_avg_acc.output_rate /= size_rand_seed;
 
 #ifndef NO_CSV_OUTPUT
       fp = fopen(data_set_name, "a");
@@ -223,6 +242,19 @@ int main(void)
       fprintf(fp, "%f, ",
               1e3 * for_avg_acc.accumulated_delay / for_avg_acc.number_of_packets_processed);
 
+      //fprintf(fp, ("B_t,"));
+      fprintf(fp, "%d, ", data.B_t);
+
+      //fprintf(fp, ("B_d,"));
+      fprintf(fp, "%d, ", data.B_d);
+
+      //fprintf(fp, ("block_rate,"));
+      fprintf(fp, "%.3f, ", (double)for_avg_acc.block_rate);
+
+      //fprintf(fp, ("output_rate,"));
+      fprintf(fp, "%.3f, ", (double)for_avg_acc.output_rate);
+
+
       fprintf(fp, "\n");
       fclose(fp);
 #endif
@@ -243,6 +275,15 @@ int main(void)
       printf("avg Mean Delay (msec) = %f \n",
              1e3 * for_avg_acc.accumulated_delay / for_avg_acc.number_of_packets_processed);
 
+      printf("B_t : %d, ", data.B_t);
+
+      printf("B_d : %d, ", data.B_d);
+
+      printf("block_rate : %.3f, ", (double)for_avg_acc.block_rate);
+
+      printf("output_rate : %.3f, ", (double)for_avg_acc.output_rate);
+      printf("sim_time : %.3f, ", sim_time);
+      printf("ratio between a packet time and clk tic: %.3f, ", ((double)(data.fixed_packet_len) / LINK_BIT_RATE)/ CLK_TIC_LIST[k]);
       printf("\n");
     }
   }

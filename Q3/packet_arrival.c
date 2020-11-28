@@ -93,7 +93,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
   int index = (int) uniform_generator() * 5;
   int packet_length = data->packet_length_list[index];
   */
-  double transmission_time = (double) data->fixed_paket_len/LINK_BIT_RATE;
+  double transmission_time = (double) data->fixed_packet_len/LINK_BIT_RATE;
  
   new_packet->service_time = transmission_time;
   new_packet->status = WAITING;
@@ -114,6 +114,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
       else
       {
         TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->buffer)););
+        data->num_blocked++;
       }
   } 
   else if (fifoqueue_size(data->token_buffer) > 0 ){
@@ -133,6 +134,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
       else
       {
         TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->buffer)););
+        data->num_blocked++;
       }
   }
 
