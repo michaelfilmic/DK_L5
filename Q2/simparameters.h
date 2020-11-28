@@ -29,17 +29,15 @@
 /******************************************************************************/
 
 #define PACKET_ARRIVAL_RATE 100 /* packets per second */
-#define N_BYTE_COUNT 3000, 5000, 6000
-#define CLK_TIC 1
+#define N_BYTE_COUNT 30000
+#define CLK_TIC 1.0
 #define PACKET_LENGTH 500, 1000, 1500, 2000, 2500 /* bits */
 #define LINK_BIT_RATE 1e6 /* bits per second */
-#define MAX_QUEUE_SIZE 50000
 #define RUNLENGTH 10e6 /* packets */
 
 /* Comma separated list of random seeds to run. */
 #define RANDOM_SEED_LIST 400050636, 400099173, 225
 
-#define PACKET_XMT_TIME ((double) PACKET_LENGTH/LINK_BIT_RATE)
 #define BLIPRATE (RUNLENGTH/1000)
 
 /******************************************************************************/

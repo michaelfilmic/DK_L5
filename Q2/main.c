@@ -57,18 +57,13 @@ int main(void)
    */
 
   unsigned RANDOM_SEEDS[] = {RANDOM_SEED_LIST, 0};
-  double PACKET_ARRIVAL_RATE_LIST[] = {PACKET_ARRIVAL_RATE};
   int PACKET_LENGTH_LIST[] = {PACKET_LENGTH};
   double CLK_TIC_LIST[] = {CLK_TIC};
   int N_BYTE_COUNT_LIST[] = {N_BYTE_COUNT};
   unsigned random_seed;
 
   int size_rand_seed = (sizeof(RANDOM_SEEDS) / sizeof(unsigned)) - 1;
-  printf("size_rand_seed = %d \n", size_rand_seed);
 
-  int j;
-
-#ifndef NO_CSV_OUTPUT
   // create a csv file
   FILE *fp;
   char data_set_name[] = "./Q2.csv";
@@ -87,7 +82,6 @@ int main(void)
 
   fprintf(fp, "\n");
   fclose(fp);
-#endif
 
   for (int k = 0; k < (sizeof(CLK_TIC_LIST) / sizeof(double)); k++)
   {
@@ -95,7 +89,7 @@ int main(void)
     for (int i = 0; i < (sizeof(N_BYTE_COUNT_LIST) / sizeof(int)); i++)
     {
 
-      j = 0;
+      int j = 0;
       random_seed = RANDOM_SEEDS[j];
 
       for_avg_acc.packet_arrival_rate = 0;
@@ -105,9 +99,9 @@ int main(void)
       for_avg_acc.accumulated_delay = 0;
       for_avg_acc.random_seed = 0;
 
-      while (random_seed != 0)
+      while ((random_seed = RANDOM_SEEDS[j++]) != 0)
       {
-
+        
         simulation_run = simulation_run_new(); /* Create a new simulation run. */
 
         /*
@@ -120,7 +114,7 @@ int main(void)
          * Initialize the simulation_run data variables, declared in main.h.
          */
 
-        data.packet_arrival_rate = PACKET_ARRIVAL_RATE_LIST[i];
+        data.packet_arrival_rate = PACKET_ARRIVAL_RATE;
         for (int m = 0; m < (sizeof(PACKET_LENGTH_LIST) / sizeof(int)); m++)
         {
           data.packet_length_list[m] = PACKET_LENGTH_LIST[m];
@@ -128,6 +122,7 @@ int main(void)
         data.n_byte_count = N_BYTE_COUNT_LIST[i];
         data.current_byte_count = data.n_byte_count;
         data.clk_tic = CLK_TIC_LIST[k];
+        data.current_slot_end_time = 0;
         data.blip_counter = 0;
         data.arrival_count = 0;
         data.number_of_packets_processed = 0;
@@ -150,11 +145,11 @@ int main(void)
         /* 
          * Schedule the initial packet arrival for the current clock time (= 0).
          */
-
+        
         schedule_packet_arrival_event(simulation_run,
                                       simulation_run_get_time(simulation_run));
         schedule_slot_event(simulation_run, simulation_run_get_time(simulation_run));
-
+        
         /* 
          * Execute events until we are finished. 
          */
@@ -163,7 +158,6 @@ int main(void)
         {
           simulation_run_execute_event(simulation_run);
         }
-
         /*
          * Output results and clean up after ourselves.
          */
@@ -179,7 +173,6 @@ int main(void)
 
         cleanup_memory(simulation_run);
 
-        j++;
         random_seed = RANDOM_SEEDS[j];
       }
 
@@ -190,7 +183,6 @@ int main(void)
       for_avg_acc.accumulated_delay /= size_rand_seed;
       for_avg_acc.random_seed /= size_rand_seed;
 
-#ifndef NO_CSV_OUTPUT
       fp = fopen(data_set_name, "a");
       //cell/element name/type
 
@@ -215,7 +207,6 @@ int main(void)
 
       fprintf(fp, "\n");
       fclose(fp);
-#endif
 
       double xmtted_fraction;
       printf("\n");
@@ -234,9 +225,9 @@ int main(void)
              1e3 * for_avg_acc.accumulated_delay / for_avg_acc.number_of_packets_processed);
 
       printf("\n");
+
     }
   }
 
-  //getchar();   /* Pause before finishing. */
   return 0;
 }

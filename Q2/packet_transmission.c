@@ -92,10 +92,11 @@ end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void * link)
    * See if there is are packets waiting in the buffer. If so, take the next one
    * out and transmit it immediately.
   */
-
-  if(fifoqueue_size(data->buffer) > 0) {
+  next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
+  if (fifoqueue_size(data->buffer) > 0 && next_packet->packet_size <= data->current_byte_count){
     next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
-    start_transmission_on_link(simulation_run, next_packet, link);
+    data->current_byte_count -= next_packet->packet_size;
+    start_transmission_on_link(simulation_run, next_packet, data->link);
   }
 }
 
@@ -121,13 +122,3 @@ start_transmission_on_link(Simulation_Run_Ptr simulation_run,
 	 (void *) link);
 }
 
-// /*
-//  * Get a packet transmission time. For now it is a fixed value defined in
-//  * simparameters.h
-//  */
-
-// double
-// get_packet_transmission_time(void)
-// {
-//   return ((double) PACKET_XMT_TIME);
-// }

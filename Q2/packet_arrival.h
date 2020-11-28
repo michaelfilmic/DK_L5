@@ -47,7 +47,7 @@ slot_event(Simulation_Run_Ptr, void *);
 
 
 long int
-schedule_slot_event(Simulation_Run_Ptr, Time);
+schedule_slot_event(Simulation_Run_Ptr, double);
 
 /******************************************************************************/
 

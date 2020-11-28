@@ -55,7 +55,7 @@ schedule_packet_arrival_event(Simulation_Run_Ptr simulation_run,
 
 long int
 schedule_slot_event(Simulation_Run_Ptr simulation_run,
-			      Time event_time)
+			      double event_time)
 {
   Event event;
 
@@ -87,20 +87,20 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
   new_packet = (Packet_Ptr) xmalloc(sizeof(Packet));
   new_packet->arrive_time = simulation_run_get_time(simulation_run);
 
-  int index = (int) uniform_generator() * 5;
+  int index = (int) uniform_generator() * 5; 
   int packet_length = data->packet_length_list[index];
   double transmission_time = (double) packet_length/LINK_BIT_RATE;
   new_packet->service_time = transmission_time;
   new_packet->status = WAITING;
-
+  new_packet->packet_size = packet_length;
   /* 
    * Start transmission if the data link is free. Otherwise put the packet into
    * the buffer.
    */
-
   if(server_state(data->link) == BUSY) {
     fifoqueue_put(data->buffer, (void*) new_packet);
   } else if (new_packet->packet_size <= data->current_byte_count){
+    data->current_byte_count -= new_packet->packet_size;
     start_transmission_on_link(simulation_run, new_packet, data->link);
   }
 
@@ -108,7 +108,6 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
    * Schedule the next packet arrival. Independent, exponentially distributed
    * interarrival times gives us Poisson process arrivals.
    */
-
   schedule_packet_arrival_event(simulation_run,
 			simulation_run_get_time(simulation_run) +
 			exponential_generator((double) 1/data->packet_arrival_rate));
@@ -124,13 +123,16 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
   data = (Simulation_Run_Data_Ptr) simulation_run_data(simulation_run);
 
   data->current_slot_end_time = data->current_slot_end_time + data->clk_tic;
+  printf("current time %f\n", data->current_slot_end_time);
 
   //update n
   data->current_byte_count = data->n_byte_count;
 
   next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
-  if (next_packet->packet_size <= data->current_byte_count){
+
+  if (fifoqueue_size(data->buffer) > 0 && next_packet->packet_size <= data->current_byte_count){
     next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
+    data->current_byte_count -= next_packet->packet_size;
     start_transmission_on_link(simulation_run, next_packet, data->link);
   }
 
