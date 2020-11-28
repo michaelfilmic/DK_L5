@@ -38,16 +38,15 @@
  * event and is recovered in end_packet_transmission.c.
  */
 
-long
-schedule_end_packet_transmission_event(Simulation_Run_Ptr simulation_run,
-				       double event_time,
-				       Server_Ptr link)
+long schedule_end_packet_transmission_event(Simulation_Run_Ptr simulation_run,
+                                            double event_time,
+                                            Server_Ptr link)
 {
   Event event;
 
   event.description = "Packet Xmt End";
   event.function = end_packet_transmission_event;
-  event.attachment = (void *) link;
+  event.attachment = (void *)link;
 
   return simulation_run_schedule_event(simulation_run, event, event_time);
 }
@@ -61,42 +60,59 @@ schedule_end_packet_transmission_event(Simulation_Run_Ptr simulation_run,
  * starts the transmission of the next packet.
  */
 
-void
-end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void * link)
+void end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void *link)
 {
   Simulation_Run_Data_Ptr data;
   Packet_Ptr this_packet, next_packet;
 
   TRACE(printf("End Of Packet.\n"););
 
-  data = (Simulation_Run_Data_Ptr) simulation_run_data(simulation_run);
+  data = (Simulation_Run_Data_Ptr)simulation_run_data(simulation_run);
 
   /* 
    * Packet transmission is finished. Take the packet off the data link.
    */
 
-  this_packet = (Packet_Ptr) server_get(link);
+  this_packet = (Packet_Ptr)server_get(link);
+
+  data->end_time = simulation_run_get_time(simulation_run);
 
   /* Collect statistics. */
   data->number_of_packets_processed++;
-  data->accumulated_delay += simulation_run_get_time(simulation_run) - 
-    this_packet->arrive_time;
+  data->accumulated_delay += simulation_run_get_time(simulation_run) -
+                             this_packet->arrive_time;
+  int index = 0;
+  for(int i = 0; i<sizeof(data->packet_length_list)/sizeof(int); i++){
+    if (this_packet->packet_size == data->packet_length_list[i]){
+      index = i;
+      //printf("index %d\n", index);
+      break;
+    }
+  }
+  data->packet_count[index]++;
 
   /* Output activity blip every so often. */
   //output_progress_msg_to_screen(simulation_run);
 
   /* This packet is done ... give the memory back. */
-  xfree((void *) this_packet);
+  xfree((void *)this_packet);
 
   /* 
    * See if there is are packets waiting in the buffer. If so, take the next one
    * out and transmit it immediately.
   */
-  next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
-  if (fifoqueue_size(data->buffer) > 0 && next_packet->packet_size <= data->current_byte_count){
-    next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
-    data->current_byte_count -= next_packet->packet_size;
-    start_transmission_on_link(simulation_run, next_packet, data->link);
+  //next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
+  if (fifoqueue_size(data->buffer) > 0)
+  {
+    next_packet = (Packet_Ptr)fifoqueue_see_front(data->buffer);
+
+    if (next_packet->packet_size <= data->current_byte_count)
+    {
+      next_packet = (Packet_Ptr)fifoqueue_get(data->buffer);
+      data->current_byte_count -= next_packet->packet_size;
+
+      start_transmission_on_link(simulation_run, next_packet, data->link);
+    }
   }
 }
 
@@ -106,19 +122,17 @@ end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void * link)
  * transmission end event for this packet is then scheduled.
  */
 
-void
-start_transmission_on_link(Simulation_Run_Ptr simulation_run, 
-			   Packet_Ptr this_packet,
-			   Server_Ptr link)
+void start_transmission_on_link(Simulation_Run_Ptr simulation_run,
+                                Packet_Ptr this_packet,
+                                Server_Ptr link)
 {
   TRACE(printf("Start Of Packet.\n");)
-
-  server_put(link, (void*) this_packet);
+  
+  server_put(link, (void *)this_packet);
   this_packet->status = XMTTING;
 
   /* Schedule the end of packet transmission event. */
   schedule_end_packet_transmission_event(simulation_run,
-	 simulation_run_get_time(simulation_run) + this_packet->service_time,
-	 (void *) link);
+                                         simulation_run_get_time(simulation_run) + this_packet->service_time,
+                                         (void *)link);
 }
-
