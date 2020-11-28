@@ -23,6 +23,8 @@
 
 /******************************************************************************/
 
+#include <assert.h>
+#include "trace.h"
 #include <math.h>
 #include <stdio.h>
 #include "main.h"
@@ -87,9 +89,12 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
   new_packet = (Packet_Ptr) xmalloc(sizeof(Packet));
   new_packet->arrive_time = simulation_run_get_time(simulation_run);
 
+  /*
   int index = (int) uniform_generator() * 5;
   int packet_length = data->packet_length_list[index];
-  double transmission_time = (double) packet_length/LINK_BIT_RATE;
+  */
+  double transmission_time = (double) data->fixed_paket_len/LINK_BIT_RATE;
+ 
   new_packet->service_time = transmission_time;
   new_packet->status = WAITING;
 
@@ -97,11 +102,38 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
    * Start transmission if the data link is free. Otherwise put the packet into
    * the buffer.
    */
+#ifndef ASSERT_OFF
+  assert(fifoqueue_size(data->token_buffer) >= 0);
+#endif
 
   if(server_state(data->link) == BUSY) {
-    fifoqueue_put(data->buffer, (void*) new_packet);
-  } else if (new_packet->packet_size <= data->current_byte_count){
+      if (fifoqueue_size(data->buffer) < data->B_d)
+      {
+        fifoqueue_put(data->buffer, (void*) new_packet);
+      }
+      else
+      {
+        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->token_buffer)););
+      }
+  } 
+  else if (fifoqueue_size(data->token_buffer) > 0 ){
+
+    TRACE(printf("in arrival token fifo size %d \n",fifoqueue_size(data->token_buffer)););
+    
+    fifoqueue_get(data->token_buffer);
+    
     start_transmission_on_link(simulation_run, new_packet, data->link);
+  }
+  else
+  {
+      if (fifoqueue_size(data->buffer) < data->B_d)
+      {
+        fifoqueue_put(data->buffer, (void*) new_packet);
+      }
+      else
+      {
+        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->token_buffer)););
+      }
   }
 
   /* 
@@ -119,12 +151,45 @@ void
 slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr) 
 {
   Simulation_Run_Data_Ptr data;
-  Packet_Ptr next_packet;
+  Packet_Ptr token;
+  Packet_Ptr data_packet;
+  Time now;
 
   data = (Simulation_Run_Data_Ptr) simulation_run_data(simulation_run);
 
-  data->current_slot_end_time = data->current_slot_end_time + data->clk_tic;
+  token = (Packet_Ptr) xmalloc(sizeof(Packet));
+  token->arrive_time = -1;
 
+  token->service_time = -1;
+  token->status = WAITING;
+
+  now = simulation_run_get_time(simulation_run);
+
+  if (fifoqueue_size(data->token_buffer) < data->B_t)
+  {
+      fifoqueue_put(data->token_buffer, (void*) token);
+  }
+  else
+  {
+    TRACE(printf("token fifo is full with size %d \n",fifoqueue_size(data->token_buffer)););
+
+  }
+  
+  if(server_state(data->link) == FREE) {
+      if (fifoqueue_size(data->buffer) > 0 ){
+
+        data_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
+
+        TRACE(printf("not enough token case %d \n",fifoqueue_size(data->token_buffer)););
+    
+        fifoqueue_get(data->token_buffer);
+    
+        start_transmission_on_link(simulation_run, data_packet, data->link);
+      }
+  }
+ 
+
+  /*
   //update n
   data->current_byte_count = data->n_byte_count;
 
@@ -133,8 +198,9 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
     next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
     start_transmission_on_link(simulation_run, next_packet, data->link);
   }
+  */
 
-  schedule_slot_event(simulation_run, data->current_slot_end_time);
+  schedule_slot_event(simulation_run, data->clk_tic + now);
 }
 
 

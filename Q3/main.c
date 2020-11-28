@@ -59,8 +59,12 @@ int main(void)
   unsigned RANDOM_SEEDS[] = {RANDOM_SEED_LIST, 0};
   double PACKET_ARRIVAL_RATE_LIST[] = {PACKET_ARRIVAL_RATE};
   int PACKET_LENGTH_LIST[] = {PACKET_LENGTH};
-  double CLK_TIC_LIST[] = {CLK_TIC};
   int N_BYTE_COUNT_LIST[] = {N_BYTE_COUNT};
+
+  int B_t_LIST[] = {B_T_SIZE};
+  int B_d_LIST[] = {MAX_QUEUE_SIZE};
+  double CLK_TIC_LIST[] = {CLK_TIC};
+
   unsigned random_seed;
 
   int size_rand_seed = (sizeof(RANDOM_SEEDS) / sizeof(unsigned)) - 1;
@@ -127,7 +131,12 @@ int main(void)
         }
         data.n_byte_count = N_BYTE_COUNT_LIST[i];
         data.current_byte_count = data.n_byte_count;
+
         data.clk_tic = CLK_TIC_LIST[k];
+        data.B_t = B_t_LIST[k];
+        data.B_d = B_d_LIST[k];
+        data.fixed_paket_len = 1E3;
+
         data.blip_counter = 0;
         data.arrival_count = 0;
         data.number_of_packets_processed = 0;
@@ -139,6 +148,7 @@ int main(void)
          */
 
         data.buffer = fifoqueue_new();
+        data.token_buffer = fifoqueue_new();
         data.link = server_new();
 
         /* 

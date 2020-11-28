@@ -94,8 +94,13 @@ end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void * link)
   */
 
   if(fifoqueue_size(data->buffer) > 0) {
-    next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
-    start_transmission_on_link(simulation_run, next_packet, link);
+        if (fifoqueue_size(data->token_buffer) > 0 ){
+
+            TRACE(printf("in trans token fifo size %d \n",fifoqueue_size(data->token_buffer)););
+            fifoqueue_get(data->token_buffer);
+            next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
+            start_transmission_on_link(simulation_run, next_packet, link);
+        }
   }
 }
 
