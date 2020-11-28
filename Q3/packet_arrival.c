@@ -113,7 +113,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
       }
       else
       {
-        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->token_buffer)););
+        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->buffer)););
       }
   } 
   else if (fifoqueue_size(data->token_buffer) > 0 ){
@@ -132,7 +132,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
       }
       else
       {
-        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->token_buffer)););
+        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->buffer)););
       }
   }
 
@@ -141,9 +141,15 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
    * interarrival times gives us Poisson process arrivals.
    */
 
+#ifdef D_D_system
+  schedule_packet_arrival_event(simulation_run,
+			simulation_run_get_time(simulation_run) +
+			(double) 1/data->packet_arrival_rate);
+#else
   schedule_packet_arrival_event(simulation_run,
 			simulation_run_get_time(simulation_run) +
 			exponential_generator((double) 1/data->packet_arrival_rate));
+#endif
 }
 
 /******************************************************************************/
@@ -180,7 +186,7 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
 
         data_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
 
-        TRACE(printf("not enough token case %d \n",fifoqueue_size(data->token_buffer)););
+        TRACE(printf("not enough token case, data fifo size %d \n",fifoqueue_size(data->token_buffer)););
     
         fifoqueue_get(data->token_buffer);
     

@@ -26,16 +26,17 @@
 #ifndef _SIMPARAMETERS_H_
 #define _SIMPARAMETERS_H_
 
+#define D_D_system
 /******************************************************************************/
 
-#define PACKET_ARRIVAL_RATE 100 /* packets per second */
+#define PACKET_ARRIVAL_RATE 8.5 /* packets per second */
 #define N_BYTE_COUNT 3000
-#define PACKET_LENGTH 500 /* bits */
-#define LINK_BIT_RATE 1e6 /* bits per second */
-#define RUNLENGTH 1e1 /* packets */
+#define PACKET_LENGTH 1 /* bits */
+#define LINK_BIT_RATE 1e3 /* bits per second */
+#define RUNLENGTH 2 /* packets */
 
-#define B_T_SIZE 10
-#define MAX_QUEUE_SIZE 500 //B_d
+#define B_T_SIZE 2
+#define MAX_QUEUE_SIZE 5 //B_d
 #define CLK_TIC 1
 
 /* Comma separated list of random seeds to run. */
