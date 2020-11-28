@@ -30,6 +30,7 @@
 
 #define PACKET_ARRIVAL_RATE 100 /* packets per second */
 #define N_BYTE_COUNT 3000, 5000, 6000
+#define CLK_TIC 1
 #define PACKET_LENGTH 500, 1000, 1500, 2000, 2500 /* bits */
 #define LINK_BIT_RATE 1e6 /* bits per second */
 #define MAX_QUEUE_SIZE 50000

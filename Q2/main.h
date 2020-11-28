@@ -33,6 +33,10 @@
 
 /******************************************************************************/
 
+typedef double Time;
+
+/******************************************************************************/
+
 typedef struct _simulation_run_data_ 
 {
   Fifoqueue_Ptr buffer;
@@ -40,6 +44,10 @@ typedef struct _simulation_run_data_
   double packet_arrival_rate;
   int packet_length_list[5];
   int n_byte_count;
+  int current_byte_count;
+  double clk_tic;
+  double current_slot_end_time;
+
   long int blip_counter;
   long int arrival_count;
   long int number_of_packets_processed;
@@ -55,6 +63,7 @@ typedef struct _packet_
   double service_time;
   int source_id;
   int destination_id;
+  int packet_size;
   Packet_Status status;
 } Packet, * Packet_Ptr;
 

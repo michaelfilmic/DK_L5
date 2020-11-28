@@ -51,6 +51,21 @@ schedule_packet_arrival_event(Simulation_Run_Ptr simulation_run,
   return simulation_run_schedule_event(simulation_run, event, event_time);
 }
 
+/*******************************************************************************/
+
+long int
+schedule_slot_event(Simulation_Run_Ptr simulation_run,
+			      Time event_time)
+{
+  Event event;
+
+  event.description = "Slot";
+  event.function = slot_event;
+  event.attachment = NULL;
+
+  return simulation_run_schedule_event(simulation_run, event, event_time);
+}
+
 /******************************************************************************/
 
 /*
@@ -75,7 +90,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
   int index = (int) uniform_generator() * 5;
   int packet_length = data->packet_length_list[index];
   double transmission_time = (double) packet_length/LINK_BIT_RATE;
-  new_packet->service_time = transmission_time; 
+  new_packet->service_time = transmission_time;
   new_packet->status = WAITING;
 
   /* 
@@ -85,7 +100,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
 
   if(server_state(data->link) == BUSY) {
     fifoqueue_put(data->buffer, (void*) new_packet);
-  } else {
+  } else if (new_packet->packet_size <= data->current_byte_count){
     start_transmission_on_link(simulation_run, new_packet, data->link);
   }
 
@@ -97,6 +112,28 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
   schedule_packet_arrival_event(simulation_run,
 			simulation_run_get_time(simulation_run) +
 			exponential_generator((double) 1/data->packet_arrival_rate));
+}
+
+/******************************************************************************/
+void
+slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr) 
+{
+  Simulation_Run_Data_Ptr data;
+  Packet_Ptr next_packet;
+
+  data = (Simulation_Run_Data_Ptr) simulation_run_data(simulation_run);
+
+  data->current_slot_end_time = data->current_slot_end_time + data->clk_tic;
+
+  //update n
+  data->current_byte_count = data->n_byte_count;
+
+  if (fifoqueue_see_front(data->buffer)){
+    next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
+    start_transmission_on_link(simulation_run, next_packet, data->link);
+  }
+
+  schedule_slot_event(simulation_run, data->current_slot_end_time);
 }
 
 
