@@ -122,6 +122,7 @@ int main(void)
         data.n_byte_count = N_BYTE_COUNT_LIST[i];
         data.current_byte_count = data.n_byte_count;
         data.clk_tic = CLK_TIC_LIST[k];
+        data.current_slot_end_time = 0;
         data.blip_counter = 0;
         data.arrival_count = 0;
         data.number_of_packets_processed = 0;
@@ -157,7 +158,6 @@ int main(void)
         {
           simulation_run_execute_event(simulation_run);
         }
-        printf("randomseed %f", CLK_TIC_LIST[k]);
         /*
          * Output results and clean up after ourselves.
          */
