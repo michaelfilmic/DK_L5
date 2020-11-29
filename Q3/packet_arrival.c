@@ -106,6 +106,7 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
   assert(fifoqueue_size(data->token_buffer) >= 0);
 #endif
 
+#ifndef Q3B
   if(server_state(data->link) == BUSY) {
       if (fifoqueue_size(data->buffer) < data->B_d)
       {
@@ -137,6 +138,46 @@ packet_arrival_event(Simulation_Run_Ptr simulation_run, void * ptr)
         data->num_blocked++;
       }
   }
+#else
+  int est_num_token;
+  est_num_token = (int)(ceil((new_packet->service_time * LINK_BIT_RATE)/TOKEN_RESOL));
+  TRACE(printf("new_packet->service_time * LINK_BIT_RATE)/TOKEN_RESOL %f \n",new_packet->service_time * LINK_BIT_RATE/TOKEN_RESOL););
+  TRACE(printf("est_num_token %d \n",est_num_token););
+  
+  if(server_state(data->link) == BUSY) {
+      if (fifoqueue_size(data->buffer) < data->B_d)
+      {
+        fifoqueue_put(data->buffer, (void*) new_packet);
+      }
+      else
+      {
+        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->buffer)););
+        data->num_blocked++;
+      }
+  } 
+  else if (fifoqueue_size(data->token_buffer) - est_num_token >= 0 ){
+
+    TRACE(printf("in arrival token fifo size %d \n",fifoqueue_size(data->token_buffer)););
+    for (int est = 0; est < est_num_token; est++)
+    {
+        fifoqueue_get(data->token_buffer);
+    }
+    
+    start_transmission_on_link(simulation_run, new_packet, data->link);
+  }
+  else
+  {
+      if (fifoqueue_size(data->buffer) < data->B_d)
+      {
+        fifoqueue_put(data->buffer, (void*) new_packet);
+      }
+      else
+      {
+        TRACE(printf("data fifo is full size %d \n",fifoqueue_size(data->buffer)););
+        data->num_blocked++;
+      }
+  }
+#endif
 
   /* 
    * Schedule the next packet arrival. Independent, exponentially distributed
@@ -182,7 +223,7 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
     TRACE(printf("token fifo is full with size %d \n",fifoqueue_size(data->token_buffer)););
 
   }
-  
+#ifndef Q3B 
   if(server_state(data->link) == FREE) {
       if (fifoqueue_size(data->buffer) > 0 ){
 
@@ -195,6 +236,28 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
         start_transmission_on_link(simulation_run, data_packet, data->link);
       }
   }
+#else
+  if(server_state(data->link) == FREE) {
+      if (fifoqueue_size(data->buffer) > 0 ){
+
+          data_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
+          int est_num_token;
+          est_num_token = (int)(ceil((data_packet->service_time * LINK_BIT_RATE)/TOKEN_RESOL));
+          if (fifoqueue_size(data->token_buffer) - est_num_token >= 0 ){
+
+            TRACE(printf("in arrival token fifo size %d \n",fifoqueue_size(data->token_buffer)););
+            for (int est = 0; est < est_num_token; est++)
+            {
+                fifoqueue_get(data->token_buffer);
+            }
+            data_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
+    
+            start_transmission_on_link(simulation_run, data_packet, data->link);
+            TRACE(printf("not enough token case, data fifo size %d \n",fifoqueue_size(data->token_buffer)););
+          }
+      }
+  }
+#endif
  
 
   /*
@@ -208,7 +271,13 @@ slot_event(Simulation_Run_Ptr simulation_run, void* dummy_ptr)
   }
   */
 
+#ifdef exp_slot_time
+  schedule_slot_event(simulation_run, exponential_generator(data->clk_tic) + now);
+
+#else
   schedule_slot_event(simulation_run, data->clk_tic + now);
+
+#endif
 }
 
 

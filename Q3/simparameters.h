@@ -26,7 +26,11 @@
 #ifndef _SIMPARAMETERS_H_
 #define _SIMPARAMETERS_H_
 
+#define Q3B
+
+#define TOKEN_RESOL 1000.0
 //#define D_D_system
+//#define exp_slot_time
 //#define FAST_RUN
 /******************************************************************************/
 
@@ -35,15 +39,14 @@
 #define N_BYTE_COUNT 3000
 #define FIXED_PACKET_LENGTH 1E3 /* bits */
 #define LINK_BIT_RATE 1E6 /* bits per second */
-#define RUNLENGTH 2 /* packets */
-#define PACKET_ARRIVAL_RATE 120 /* packets per second */
+#define RUNLENGTH 1E1 /* packets */
+#define PACKET_ARRIVAL_RATE 300/* packets per second */
 
-#define B_T_SIZE 10, 20
-#define MAX_QUEUE_SIZE 20, 30 //B_d
-#define CLK_TIC 0.01
+#define B_T_SIZE 15 
+#define MAX_QUEUE_SIZE 5 
+#define CLK_TIC  0.002
 
 /* Comma separated list of random seeds to run. */
-//#define RANDOM_SEED_LIST 400050636, 400099173, 225
 #define RANDOM_SEED_LIST 400050636
 
 #else
@@ -51,20 +54,18 @@
 #define N_BYTE_COUNT 3000
 #define FIXED_PACKET_LENGTH 1E3 /* bits */
 #define LINK_BIT_RATE 1E6 /* bits per second */
-#define RUNLENGTH 1E3 /* packets */
-#define PACKET_ARRIVAL_RATE 1, 5, 10, 20, 50, 70, 90, 120 /* packets per second */
+#define RUNLENGTH 1E4 /* packets */
+#define PACKET_ARRIVAL_RATE 300, 500, 1000, 1500/* packets per second */
 
-#define B_T_SIZE 5*1 , 5*2 , 5*3 , 5*4 
-#define MAX_QUEUE_SIZE 5*1 , 5*1 , 5*1 , 5*1  //B_d
-#define CLK_TIC 0.01, 0.01, 0.01, 0.01
+#define B_T_SIZE 15 , 15 , 15 , 15 , 15 
+#define MAX_QUEUE_SIZE 5, 10 , 15 , 20, 25 
+#define CLK_TIC  0.002, 0.0005
 
 /* Comma separated list of random seeds to run. */
 #define RANDOM_SEED_LIST 400050636, 400099173, 225
-//#define RANDOM_SEED_LIST 400050636
 
 #endif
 
-#define PACKET_XMT_TIME ((double) PACKET_LENGTH/LINK_BIT_RATE)
 #define BLIPRATE (RUNLENGTH/1000)
 
 /******************************************************************************/

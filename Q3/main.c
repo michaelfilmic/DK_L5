@@ -93,15 +93,18 @@ int main(void)
   fprintf(fp, ("B_d,"));
   fprintf(fp, ("block_rate,"));
   fprintf(fp, ("output_rate,"));
+  fprintf(fp, ("clk_tic,"));
 
   fprintf(fp, "\n");
   fclose(fp);
 #endif
 
-  for (int k = 0; k < (sizeof(B_t_LIST) / sizeof(int)); k++)
+  for (int i = 0; i < (sizeof(PACKET_ARRIVAL_RATE_LIST) / sizeof(double)); i++)
   {
+    for (int mm = 0; mm < (sizeof(CLK_TIC_LIST) / sizeof(double)); mm++)
+    {
 
-    for (int i = 0; i < (sizeof(PACKET_ARRIVAL_RATE_LIST) / sizeof(double)); i++)
+    for (int k = 0; k < (sizeof(B_t_LIST) / sizeof(int)); k++)
     {
 
       j = 0;
@@ -145,7 +148,7 @@ int main(void)
         data.current_byte_count = data.n_byte_count;
         */
 
-        data.clk_tic = CLK_TIC_LIST[k];
+        data.clk_tic = CLK_TIC_LIST[mm];
         data.B_t = B_t_LIST[k];
         data.B_d = B_d_LIST[k];
         data.fixed_packet_len = FIXED_PACKET_LENGTH;
@@ -254,6 +257,8 @@ int main(void)
       //fprintf(fp, ("output_rate,"));
       fprintf(fp, "%.3f, ", (double)for_avg_acc.output_rate);
 
+      //fprintf(fp, ("clk_tic,"));
+      fprintf(fp, "%f, ", (double)data.clk_tic);
 
       fprintf(fp, "\n");
       fclose(fp);
@@ -283,9 +288,10 @@ int main(void)
 
       printf("output_rate : %.3f, ", (double)for_avg_acc.output_rate);
       printf("sim_time : %.3f, ", sim_time);
-      printf("ratio between a packet time and clk tic: %.3f, ", ((double)(data.fixed_packet_len) / LINK_BIT_RATE)/ CLK_TIC_LIST[k]);
+      printf("ratio between a packet time and clk tic: %.3f, ", ((double)(data.fixed_packet_len) / LINK_BIT_RATE)/ CLK_TIC_LIST[mm]);
       printf("\n");
     }
+  }
   }
 
   //getchar();   /* Pause before finishing. */

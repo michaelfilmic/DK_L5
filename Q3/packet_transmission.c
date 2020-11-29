@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include "trace.h"
 #include "main.h"
+#include <math.h>
 #include "output.h"
 #include "packet_transmission.h"
 
@@ -93,6 +94,7 @@ end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void * link)
    * out and transmit it immediately.
   */
 
+#ifndef Q3B
   if(fifoqueue_size(data->buffer) > 0) {
         if (fifoqueue_size(data->token_buffer) > 0 ){
 
@@ -102,6 +104,25 @@ end_packet_transmission_event(Simulation_Run_Ptr simulation_run, void * link)
             start_transmission_on_link(simulation_run, next_packet, link);
         }
   }
+#else
+  if(fifoqueue_size(data->buffer) > 0) {
+
+            next_packet = (Packet_Ptr) fifoqueue_see_front(data->buffer);
+
+          int est_num_token;
+          est_num_token = (int)(ceil((next_packet->service_time * LINK_BIT_RATE)/TOKEN_RESOL));
+        if (fifoqueue_size(data->token_buffer)-est_num_token >= 0 ){
+
+            TRACE(printf("in trans token fifo size %d \n",fifoqueue_size(data->token_buffer)););
+            for (int est = 0; est < est_num_token; est++)
+            {
+                fifoqueue_get(data->token_buffer);
+            }
+            next_packet = (Packet_Ptr) fifoqueue_get(data->buffer);
+            start_transmission_on_link(simulation_run, next_packet, link);
+        }
+  }
+#endif
 }
 
 /*
