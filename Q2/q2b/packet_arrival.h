@@ -1,7 +1,7 @@
 
 /*
  * 
- * Simulation of A Single Server Queueing System
+ * Simulation_Run of A Single Server Queueing System
  * 
  * Copyright (C) 2014 Terence D. Todd Hamilton, Ontario, CANADA,
  * todd@mcmaster.ca
@@ -23,23 +23,36 @@
 
 /******************************************************************************/
 
-#ifndef _SIMPARAMETERS_H_
-#define _SIMPARAMETERS_H_
+#ifndef _Packet_ARRIVAL_H_
+#define _Packet_ARRIVAL_H_
 
 /******************************************************************************/
 
-#define PACKET_ARRIVAL_RATE 100 /* packets per second */
-#define N_BYTE_COUNT 30000
-#define CLK_TIC 1.0
-#define PACKET_LENGTH 500, 1000, 1500, 2000, 2500 /* bits */
-#define LINK_BIT_RATE 1e6 /* bits per second */
-#define RUNLENGTH 10e6 /* packets */
-
-/* Comma separated list of random seeds to run. */
-#define RANDOM_SEED_LIST 400050636, 400099173, 225
-
-#define BLIPRATE (RUNLENGTH/1000)
+#include "simlib.h"
 
 /******************************************************************************/
 
-#endif /* simparameters.h */
+/*
+ * Function prototypes
+ */
+
+void
+packet_arrival_event(Simulation_Run_Ptr, void*);
+
+long
+schedule_packet_arrival_event(Simulation_Run_Ptr, double);
+
+void
+slot_event(Simulation_Run_Ptr, void *);
+
+
+long int
+schedule_slot_event(Simulation_Run_Ptr, double);
+
+/******************************************************************************/
+
+#endif /* packet_arrival.h */
+
+
+
+

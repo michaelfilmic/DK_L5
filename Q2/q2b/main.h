@@ -40,9 +40,15 @@ typedef struct _simulation_run_data_
   int packet_arrival_rate;
   int packet_length_list[5];
   int n_byte_count;
+  long int link_rate;
   int current_byte_count;
   double clk_tic;
   double current_slot_end_time;
+  int block_count;
+  double total_bits;
+  double end_time;
+  int packet_count[5];
+  double output_rate;
 
   long int blip_counter;
   long int arrival_count;
