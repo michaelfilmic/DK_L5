@@ -1,8 +1,8 @@
-Table = csvread('Q2b.csv',1);  % skips the first three rows of data
+Table = csvread('Q2.csv',1);  % skips the first three rows of data
 
 x = Table(:,2);
-output_rate = Table(:,5);
-block_rate = Table(:,3);
+output_rate = Table(:,6);
+block_rate = Table(:,4);
 
 yyaxis left
 plot(x,block_rate,'b-o','LineWidth',3);

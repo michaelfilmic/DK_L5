@@ -100,7 +100,7 @@ void packet_arrival_event(Simulation_Run_Ptr simulation_run, void *ptr)
    * Start transmission if the data link is free. Otherwise put the packet into
    * the buffer.
    */
-    if (server_state(data->link) == BUSY)
+    if (server_state(data->link) == BUSY || new_packet->packet_size > data->current_byte_count)
     {
       fifoqueue_put(data->buffer, (void *)new_packet);
     }

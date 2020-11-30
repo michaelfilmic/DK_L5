@@ -66,7 +66,7 @@ int main(void)
 
   // create a csv file
   FILE *fp;
-  char data_set_name[] = "./Q2b.csv";
+  char data_set_name[] = "./Q2.csv";
   //file IO
 
   fp = fopen(data_set_name, "w");
@@ -88,7 +88,7 @@ int main(void)
   for (int k = 0; k < (sizeof(CLK_TIC_LIST) / sizeof(double)); k++)
   {
 
-    for (int i = 0; i < (sizeof(LINK_BIT_RATE_LIST) / sizeof(int)); i++)
+    for (int i = 0; i < (sizeof(LINK_BIT_RATE_LIST) / sizeof(long int)); i++)
     {
 
       int j = 0;

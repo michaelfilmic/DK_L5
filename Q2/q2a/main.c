@@ -66,7 +66,7 @@ int main(void)
 
   // create a csv file
   FILE *fp;
-  char data_set_name[] = "./Q2b.csv";
+  char data_set_name[] = "./Q2.csv";
   //file IO
 
   fp = fopen(data_set_name, "w");
