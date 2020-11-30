@@ -26,9 +26,9 @@
 #ifndef _SIMPARAMETERS_H_
 #define _SIMPARAMETERS_H_
 
-#define Q3B
+//#define Q3B
 
-#define TOKEN_RESOL 1000.0
+#define TOKEN_RESOL 800.0
 //#define D_D_system
 //#define exp_slot_time
 //#define FAST_RUN
@@ -55,11 +55,12 @@
 #define FIXED_PACKET_LENGTH 1E3 /* bits */
 #define LINK_BIT_RATE 1E6 /* bits per second */
 #define RUNLENGTH 1E4 /* packets */
-#define PACKET_ARRIVAL_RATE 300, 500, 1000, 1500/* packets per second */
+//#define PACKET_ARRIVAL_RATE 240, 250, 490, 500, 950, 1000, 1500/* packets per second */
+#define PACKET_ARRIVAL_RATE 600, 700, 800, 900, 950, 1000, 1500/* packets per second */
 
-#define B_T_SIZE 15 , 15 , 15 , 15 , 15 
-#define MAX_QUEUE_SIZE 5, 10 , 15 , 20, 25 
-#define CLK_TIC  0.002, 0.0005
+#define B_T_SIZE 5 , 10 , 15 , 20 , 25 
+#define MAX_QUEUE_SIZE 15, 15 , 15 , 15, 15 
+#define CLK_TIC  0.002, 0.001, 0.0005
 
 /* Comma separated list of random seeds to run. */
 #define RANDOM_SEED_LIST 400050636, 400099173, 225

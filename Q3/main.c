@@ -99,9 +99,9 @@ int main(void)
   fclose(fp);
 #endif
 
-  for (int i = 0; i < (sizeof(PACKET_ARRIVAL_RATE_LIST) / sizeof(double)); i++)
-  {
-    for (int mm = 0; mm < (sizeof(CLK_TIC_LIST) / sizeof(double)); mm++)
+for (int mm = 0; mm < (sizeof(CLK_TIC_LIST) / sizeof(double)); mm++)
+{
+    for (int i = 0; i < (sizeof(PACKET_ARRIVAL_RATE_LIST) / sizeof(double)); i++)
     {
 
     for (int k = 0; k < (sizeof(B_t_LIST) / sizeof(int)); k++)
